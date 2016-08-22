@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Viewer</title>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+        <link rel="stylesheet" href="../assets/bootstrap/css/bootstrap.min.css">
+
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #000;
+                color: #fff;
+            }
+
+            #preloader {
+                display: block;
+                background-color: #222222;
+                width: 100vw;
+                height: 100vh;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 10000;
+            }
+
+            #preloader .progress {
+                position: relative;
+                top: 50%;
+                left: 0;
+                margin: 0 15%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="preloader">
+            <div class="progress">
+                <div class="progress-bar progress-bar-success progress-bar-striped active" style="width: 0;"></div>
+            </div>
+        </div>
+
+        <script src="../assets/three/three.js"></script>
+
+        <script src="../assets/three/loaders/three.dds.js"></script>
+        <script src="../assets/three/loaders/three.mtl.js"></script>
+        <script src="../assets/three/loaders/three.objmtl.js"></script>
+
+        <script src="../assets/three/controls/three.orbit.js"></script>
+        <script src="../assets/three/controls/three.transform.js"></script>
+
+        <script src="../assets/jquery/jquery.min.js"></script>
+        <script src="../assets/bootstrap/bootstrap.min.js"></script>
+
+        <script src="../assets/helpers/request.js"></script>
+
+        <script src="javascripts/util.js"></script>
+        <script src="javascripts/texture.js"></script>
+        <script src="javascripts/material.js"></script>
+        <script src="javascripts/viewer.js"></script>
+        <script src="javascripts/app.js"></script>
+    </body>
+</html>

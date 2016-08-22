@@ -1,0 +1,13 @@
+<template name="layout">
+    <div class="{{currentRouteName}}">
+        {{> yield}}
+    </div>
+</template>
+
+<template name="loading">
+    <div class="{{currentRouteName}}">
+        <div class="container">
+            <h3 class="text-center">Loading</h3>
+        </div>
+    </div>
+</template>

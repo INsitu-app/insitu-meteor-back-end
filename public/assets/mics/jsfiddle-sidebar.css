@@ -1,0 +1,41 @@
+#content {
+    float:left;
+}
+
+#mapCanvas img {
+    max-width: none;
+}
+#maincont{
+margin-top: 42px;
+}
+
+#toggleSidebar {
+    float:left;
+    color:#779DD7;
+    padding:2px 4px;
+}
+
+#sidebar{
+ float:left;   
+}
+
+
+.accordion-heading .accordion-toggle-small {
+    display: block;
+    padding: 4px 8px; /*8px 15px;*/
+}
+
+.accordion-inner-small {
+    padding: 4px 8px;  /*9px 15px;*/
+    border-top: 1px solid #e5e5e5;
+}
+
+.no-sidebar {
+    margin-left:0 !important;
+}
+
+.scrollDiv {
+    overflow-y: scroll;
+    display: inline-block;
+    float: none; /* Very important */
+}
