@@ -14,7 +14,10 @@ Router.route("/api/collections", {where: "server"})
     .get((req, res) => {
         let temp = {};
         let collections = [];
-        let query = {};
+
+        let query = {
+            owner: "ZKSGG6oBY9vG3fDQS"
+        };
 
         if (req.query.owner) {
             query = {
