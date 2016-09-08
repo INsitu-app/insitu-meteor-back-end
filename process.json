@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      "name": "insitu-meteor-back-end",
+      "script": "./output/bundle/main.js",
+      "log_date_format": "YYYY-MM-DD",
+      "exec_mode": "fork_mode",
+      "env": {
+        "PORT": 3004,
+        "MONGO_URL": "mongodb://127.0.0.1:27017/insitu-meteor-back-end.tar.gz",
+        "ROOT_URL": "http://127.0.0.1"
+      }
+    }
+  ]
+}
