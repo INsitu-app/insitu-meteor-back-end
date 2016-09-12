@@ -14,9 +14,10 @@ Router.route("/api/collections", {where: "server"})
     .get((req, res) => {
         let temp = {};
         let collections = [];
+        let user = Accounts.findUserByEmail("tim@landscaping.co.uk");
 
         let query = {
-            owner: "ZKSGG6oBY9vG3fDQS"
+            owner: user._id
         };
 
         if (req.query.owner) {
