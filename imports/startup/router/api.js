@@ -14,7 +14,18 @@ Router.route("/api/collections", {where: "server"})
     .get((req, res) => {
         let temp = {};
         let collections = [];
-        let models = Models.find({}).fetch();
+
+        let query = {
+            owner: "ZKSGG6oBY9vG3fDQS"
+        };
+
+        if (req.query.owner) {
+            query = {
+                owner: req.query.owner
+            };
+        }
+
+        let models = Models.find(query).fetch();
 
         models.forEach((model) => {
             if (model.collection) {
