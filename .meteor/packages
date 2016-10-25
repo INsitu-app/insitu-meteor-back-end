@@ -28,3 +28,4 @@ tomi:upload-server
 tomi:upload-jquery
 mrt:jquery-ui
 iron:router
+ostrio:meteor-root

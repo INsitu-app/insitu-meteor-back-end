@@ -14,6 +14,7 @@ Router.route("/api/collections", {where: "server"})
     .get((req, res) => {
         let temp = {};
         let collections = [];
+        //let user = Accounts.findUserByEmail("testtest@test.com");
         let user = Accounts.findUserByEmail("tim@landscaping.co.uk");
 
         let query = {

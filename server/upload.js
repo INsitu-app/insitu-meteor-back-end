@@ -1,7 +1,9 @@
 import fs from "fs";
+import path from "path";
 
 Meteor.startup(() => {
-    const root = process.env.PWD || "/Projects/Web/insitu-back";
+    const root = Meteor.absolutePath;
+    //const root = process.env.PWD || "/Projects/Web/insitu-back";
 
     UploadServer.init({
         tmpDir: `${root}/uploads/tmp`,

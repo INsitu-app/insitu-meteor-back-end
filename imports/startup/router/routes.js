@@ -36,7 +36,7 @@ AdminController = BaseController.extend({
             Meteor.subscribe("Presets"),
             Meteor.subscribe("Collections")
         ]
-    },
+    }
 });
 
 Router.route("/", {

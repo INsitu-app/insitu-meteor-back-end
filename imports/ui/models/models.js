@@ -7,9 +7,12 @@ import "./editor/editor.js";
 import { Meteor } from "meteor/meteor";
 import { Template } from "meteor/templating";
 import { ReactiveDict } from "meteor/reactive-dict";
+import { Router } from "meteor/iron:router";
 
 import { Models } from "../../api/models.js";
 import { Collections } from "../../api/collections.js";
+
+import { copyToClipboard } from "../../helpers/clipboard.js";
 
 function UI() {
     $("[data-event='draggable-model']").draggable({
@@ -59,10 +62,27 @@ function UI() {
 }
 
 Template.models.onRendered(() => {
+    $(window).off().on("scroll", function (event) {
+        if (window.scrollY >= 49) {
+            $(".sidebar").css({
+                top: 0
+            });
+        } else {
+            $(".sidebar").css({
+                top: 50 - window.scrollY
+            });
+        }
+
+        console.log(window.scrollY);
+    });
+
     UI();
 });
 
 Template.models.helpers({
+    isActiveCollection(collection) {
+        return Router.current().params.collection === collection;
+    },
     modelList() {
         UI();
 
@@ -84,9 +104,6 @@ Template.models.helpers({
         return Collections.find({
             owner: Meteor.userId()
         });
-    },
-    activeCollectionList(collection) {
-        return Router.current().params.collection === collection;
     },
     onPreviewUpload() {
         return {
@@ -114,7 +131,14 @@ Template.models.events({
             return false;
         }
 
-        let collection = Collections.insert({
+        let collection = Collections.findOne({name: $name.val()});
+
+        if (collection) {
+            $name.parent().addClass("has-warning");
+            return false;
+        }
+
+        Collections.insert({
             name: $name.val(),
             owner: Meteor.userId()
         });
@@ -123,12 +147,73 @@ Template.models.events({
 
         $name.val('');
     },
+    "click [data-event='collection-remove']"(event) {
+        let id = $(event.currentTarget).closest("li").attr("data-collection");
+
+        Collections.remove({
+            _id: id
+        });
+
+        if (Router.current().params.collection == id) {
+            Router.go("models");
+        }
+    },
     "click [data-event='model-remove']"(event) {
         let id = $(event.currentTarget).attr("data-id");
 
         if (confirm("Remove this model?")) {
-            Models.remove({ _id: id });
+            Models.remove({_id: id});
         }
+    },
+    "click [data-event='copy-iframe']"(event) {
+        let $alert = $(".alert-copy");
+
+        let width = 560;
+        let height = 315;
+        let src = `http://insitu-app.com/#/cedar-nursery/cedars-1-sips-ockham-garden-building-3800-x-4800`;
+
+        let iframe = `<iframe width="${width}" height="${height}" src="${src}" frameborder="0" allowfullscreen></iframe>`;
+
+        copyToClipboard(iframe, (err, status) => {
+            $alert
+                .removeClass("alert-success")
+                .removeClass("alert-danger")
+                .addClass(status ? "alert-success" : "alert-danger")
+                .fadeIn()
+                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!")
+
+            let timeout = setTimeout(() => {
+                //$alert.fadeOut();
+                clearTimeout(timeout);
+            }, 3000);
+        });
+
+        return false;
+    },
+    "click [data-event='copy-link']"(event) {
+        let $alert = $(".alert-copy");
+
+        let page = `#/cedar-nursery/cedars-1-sips-ockham-garden-building-3800-x-4800`;
+        let link = `http://insitu-app.com/${page}`;
+
+        copyToClipboard(link, (err, status) => {
+            $alert
+                .removeClass("alert-success")
+                .removeClass("alert-danger")
+                .addClass(status ? "alert-success" : "alert-danger")
+                .fadeIn()
+                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!")
+
+            let timeout = setTimeout(() => {
+                $alert.fadeOut();
+                clearTimeout(timeout);
+            }, 3000);
+        });
+
+        return false;
+    },
+    "scroll window"() {
+        console.log(1111);
     }
 });
 

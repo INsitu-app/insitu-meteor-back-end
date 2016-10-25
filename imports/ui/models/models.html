@@ -1,29 +1,6 @@
 <template name="models">
     {{> navbar}}
 
-    <div class="modal fade bs-example-modal-sm" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                    <h4 class="modal-title">New collection</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label class="control-label">Name</label>
-                        <input type="text" class="form-control" placeholder="Your collection name" data-event="collection-name">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary" data-event="collection-save">Save</button>
-                    <button class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="jumbotron">
         <div class="container">
             <div class="row">
@@ -42,18 +19,21 @@
             <div class="col-sm-3 sidebar col-md-3">
                 <div class="page-header">
                     <h4 class="pull-left">COLLECTIONS</h4>
-                    <button class="btn icon-btn btn-glyphicon btn-success-bg pull-right" data-toggle="modal" data-target=".bs-example-modal-sm">
+                    <button class="btn icon-btn btn-glyphicon btn-success-bg pull-right" data-toggle="modal" data-target=".collection-add">
                         <span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success bg-colour-button"></span>
                     </button>
                     <div class="clearfix"></div>
                 </div>
                 <ul class="nav nav-sidebar" data-event="droppable-model-area">
-                    <li class="{{#if activeCollectionList }}active{{/if}}" data-collection="all">
+                    <li class="{{#if isActiveCollection }}active{{/if}}" data-collection="all">
                         <a href="{{ pathFor 'models'}}">all</a>
                     </li>
                     {{#each collectionList}}
-                        <li class="{{#if activeCollectionList _id}}active{{/if}}" data-collection="{{_id}}">
+                        <li class="{{#if isActiveCollection _id}}active{{/if}}" data-collection="{{_id}}" style="position: relative;">
                             <a href="{{ pathFor 'models' collection=_id }}">{{name}}</a>
+                            <button class="close" style="position: absolute; top: 7px; right: 15px;" data-event="collection-remove">
+                                <span>&times;</span>
+                            </button>
                         </li>
                     {{/each}}
                 </ul>
@@ -62,7 +42,7 @@
                 {{#each modelList}}
                     <div class="col-sm-6 col-md-3">
                         <div data-event="draggable-model">
-                            <div style="position: absolute; top: 10px; right: 25px;">
+                            <div style="position: absolute; top: 10px; right: 10px;">
                                 {{> uploadPreview id=_id callbacks=onPreviewUpload}}
 
                                 <button class="btn btn-danger" data-event="model-remove" data-id="{{_id}}">
@@ -71,20 +51,32 @@
                             </div>
 
                             <a class="thumbnail" href="{{pathFor 'editor' id=_id}}">
-                                {{#with image}}
-                                    <img src="{{url}}" alt="Generic placeholder thumbnail">
+                                {{#if image}}
+                                    <div style="height: 200px; background: url('{{image.url}}') 50% 50%; background-size: cover;"></div>
                                 {{else}}
-                                    <img src="/images/clara_bg copy.jpg" alt="Generic placeholder thumbnail">
-                                {{/with}}
+                                    <div style="height: 200px; background: url('/images/clara_bg copy.jpg') 50% 50%; background-size: cover;"></div>
+                                {{/if}}
 
                                 <div class="caption">
                                     <h3>{{name}}</h3>
                                     <div>
-                                        {{#if collection.name}}
-                                            <span class="text-success">{{collection.name}}</span>
-                                        {{else}}
-                                            <span class="text-danger">Without collection</span>
-                                        {{/if}}
+                                        <div class="pull-left">
+                                            {{#if collection}}
+                                                <span class="text-success">{{collection.name}}</span>
+                                            {{else}}
+                                                <span class="text-danger">Without collection</span>
+                                            {{/if}}
+                                        </div>
+                                        <div class="pull-right">
+                                            <button data-event="copy-iframe" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
+                                                <span class="glyphicon glyphicon-menu-left"></span>
+                                                <span class="glyphicon glyphicon-menu-right" style="position: relative; right: 6px;"></span>
+                                            </button>
+                                            <button data-event="copy-link" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
+                                                <span class="glyphicon glyphicon-link"></span>
+                                            </button>
+                                        </div>
+                                        <div class="clearfix"></div>
                                     </div>
                                 </div>
                             </a>
@@ -92,6 +84,37 @@
                     </div>
                 {{/each}}
             </div>
+        </div>
+    </div>
+
+    <div class="modals">
+        <div class="modal fade collection-add" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" data-dismiss="modal">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title">New collection</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Name</label>
+                            <input type="text" class="form-control" placeholder="Your collection name" data-event="collection-name">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-event="collection-save">Save</button>
+                        <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-copy" style="position: fixed; bottom: 0; right: 20px; display: none;">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" style="position: relative; top: 4px; padding-right: 5px;"></span>
+            <span class="message" style="position: relative; top: 2px; padding-right: 15px;">Undefined error</span>
         </div>
     </div>
 </template>
