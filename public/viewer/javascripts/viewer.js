@@ -272,6 +272,11 @@ var Viewer = (function () {
                                     done();
                                 });
                             } else {
+                                if (!child.material.bumpMap) {
+                                    child.material.bumpMap = child.material.map;
+                                    child.material.bumpMap.needsUpdate = true;
+                                }
+
                                 done();
                             }
                         }
