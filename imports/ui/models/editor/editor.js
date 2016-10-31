@@ -240,8 +240,6 @@ Template.editor.events({
 
         const presets = instance.presetsList.get();
 
-        console.log(material.params);
-
         instance.currentMaterial.set({
             name: material.name,
             typeMap: material.typeMap,
@@ -280,7 +278,7 @@ Template.editor.events({
                 preset.preset = preset.name;
                 current.preset = preset.name;
 
-                SaveModelMaterial(Router.current().params.id, current, preset);
+                const material = SaveModelMaterial(Router.current().params.id, current, preset);
 
                 $("input[name=color]").val(preset.color);
                 $("input[name=specular]").val(preset.specular);
@@ -289,6 +287,8 @@ Template.editor.events({
 
                 $(".presets .thumbnail").find("button").hide();
                 $(`.presets .thumbnail[data-preset-in-db=${preset._id}]`).find("button").show();
+
+                instance.currentMaterial.set(material);
 
                 viewer.setMaterial(preset);
             } else {
@@ -299,7 +299,7 @@ Template.editor.events({
                         preset.preset = preset.name;
                         current.preset = preset.name;
 
-                        SaveModelMaterial(Router.current().params.id, current, preset);
+                        const material = SaveModelMaterial(Router.current().params.id, current, preset);
 
                         $("input[name=color]").val(preset.color);
                         $("input[name=specular]").val(preset.specular);
@@ -309,8 +309,9 @@ Template.editor.events({
                         $(".presets .thumbnail").find("button").hide();
                         $(`.presets .thumbnail[data-preset-in-db=${preset._id}]`).find("button").show();
 
-                        viewer.setMaterial(preset);
+                        instance.currentMaterial.set(material);
 
+                        viewer.setMaterial(preset);
                         return false;
                     }
                 });

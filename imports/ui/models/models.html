@@ -50,7 +50,7 @@
                                 </button>
                             </div>
 
-                            <a class="thumbnail" href="{{pathFor 'editor' id=_id}}">
+                            <a class="thumbnail" href="{{pathFor 'editor' id=_id}}" title="{{name}}">
                                 {{#if image}}
                                     <div style="height: 200px; background: url('{{image.url}}') 50% 50%; background-size: cover;"></div>
                                 {{else}}
@@ -60,7 +60,7 @@
                                 <div class="caption">
                                     <h3>{{name}}</h3>
                                     <div>
-                                        <div class="pull-left">
+                                        <div class="pull-left" style="width: 60%; height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                             {{#if collection}}
                                                 <span class="text-success">{{collection.name}}</span>
                                             {{else}}
@@ -112,7 +112,7 @@
         </div>
 
         <div class="alert alert-copy" style="position: fixed; bottom: 0; right: 20px; display: none;">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <button type="button" class="close" data-event="alert-close"><span aria-hidden="true">&times;</span></button>
             <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" style="position: relative; top: 4px; padding-right: 5px;"></span>
             <span class="message" style="position: relative; top: 2px; padding-right: 15px;">Undefined error</span>
         </div>

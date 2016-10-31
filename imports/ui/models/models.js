@@ -72,8 +72,6 @@ Template.models.onRendered(() => {
                 top: 50 - window.scrollY
             });
         }
-
-        console.log(window.scrollY);
     });
 
     UI();
@@ -170,9 +168,11 @@ Template.models.events({
 
         let width = 560;
         let height = 315;
-        let src = `http://insitu-app.com/#/cedar-nursery/cedars-1-sips-ockham-garden-building-3800-x-4800`;
 
-        let iframe = `<iframe width="${width}" height="${height}" src="${src}" frameborder="0" allowfullscreen></iframe>`;
+        let page = `?page=viewer&query=${this._id}`;
+        let link = `http://localhost:3005/${page}`;
+
+        let iframe = `<iframe width="${width}" height="${height}" src="${link}" frameborder="0" allowfullscreen></iframe>`;
 
         copyToClipboard(iframe, (err, status) => {
             $alert
@@ -180,29 +180,7 @@ Template.models.events({
                 .removeClass("alert-danger")
                 .addClass(status ? "alert-success" : "alert-danger")
                 .fadeIn()
-                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!")
-
-            let timeout = setTimeout(() => {
-                //$alert.fadeOut();
-                clearTimeout(timeout);
-            }, 3000);
-        });
-
-        return false;
-    },
-    "click [data-event='copy-link']"(event) {
-        let $alert = $(".alert-copy");
-
-        let page = `#/cedar-nursery/cedars-1-sips-ockham-garden-building-3800-x-4800`;
-        let link = `http://insitu-app.com/${page}`;
-
-        copyToClipboard(link, (err, status) => {
-            $alert
-                .removeClass("alert-success")
-                .removeClass("alert-danger")
-                .addClass(status ? "alert-success" : "alert-danger")
-                .fadeIn()
-                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!")
+                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!");
 
             let timeout = setTimeout(() => {
                 $alert.fadeOut();
@@ -212,8 +190,30 @@ Template.models.events({
 
         return false;
     },
-    "scroll window"() {
-        console.log(1111);
+    "click [data-event='copy-link']"() {
+        let $alert = $(".alert-copy");
+
+        let page = `?page=viewer&query=${this._id}`;
+        let link = `http://localhost:3005/${page}`;
+
+        copyToClipboard(link, (err, status) => {
+            $alert
+                .removeClass("alert-success")
+                .removeClass("alert-danger")
+                .addClass(status ? "alert-success" : "alert-danger")
+                .fadeIn()
+                .find(".message").text(status ? "The text is on the clipboard, try to paste it!" : "Unsupported browser!");
+
+            let timeout = setTimeout(() => {
+                $alert.fadeOut();
+                clearTimeout(timeout);
+            }, 3000);
+        });
+
+        return false;
+    },
+    "click [data-event='alert-close']"(event) {
+        $(event.currentTarget).closest(".alert").fadeOut();
     }
 });
 

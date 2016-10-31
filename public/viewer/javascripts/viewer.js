@@ -269,12 +269,19 @@ var Viewer = (function () {
 
                                     done();
                                 }, undefined, function () {
+                                    if (child.material.map && !child.material.bumpMap) {
+                                        child.material.bumpMap = child.material.map;
+                                        child.material.bumpMap.needsUpdate = true;
+                                        child.material.bumpScale = 0;
+                                    }
+
                                     done();
                                 });
                             } else {
-                                if (!child.material.bumpMap) {
+                                if (child.material.map && !child.material.bumpMap) {
                                     child.material.bumpMap = child.material.map;
                                     child.material.bumpMap.needsUpdate = true;
+                                    child.material.bumpScale = 0;
                                 }
 
                                 done();
