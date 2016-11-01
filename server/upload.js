@@ -7,6 +7,7 @@ Meteor.startup(() => {
     UploadServer.init({
         tmpDir: `${root}/uploads/tmp`,
         uploadDir: `${root}/uploads`,
+        uploadUrl: "/upload/",
         checkCreateDirectories: true,
         getDirectory(fileInfo, formData) {
             switch (formData.method) {
