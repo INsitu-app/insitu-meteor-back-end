@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 Meteor.startup(() => {
-    const root = Meteor.absolutePath;
+    let root = process.env.PWD || Meteor.absolutePath;
 
     UploadServer.init({
         tmpDir: `${root}/uploads/tmp`,

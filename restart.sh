@@ -1,6 +1,7 @@
 #!/bin/sh
 
 cd output
+rm -rf bundle
 tar -zxf insitu-meteor-back-end.tar.gz
 cd bundle/programs/server
 npm install

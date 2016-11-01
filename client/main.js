@@ -14,8 +14,6 @@ import "../imports/ui/body/body.js";
  * Meteor
  */
 Meteor.startup(() => {
-    Uploader.uploadUrl = Meteor.absoluteUrl("upload");
-
     UI.registerHelper("currentRouteName", () => {
         return Router.current() && Router.current().route ? Router.current().route.getName() : false;
     });
