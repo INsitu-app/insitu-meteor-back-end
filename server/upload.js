@@ -3,7 +3,6 @@ import path from "path";
 
 Meteor.startup(() => {
     const root = Meteor.absolutePath;
-    //const root = process.env.PWD || "/Projects/Web/insitu-back";
 
     UploadServer.init({
         tmpDir: `${root}/uploads/tmp`,
@@ -30,6 +29,9 @@ Meteor.startup(() => {
 
                     return `others/${folder}/`;
             }
+        },
+        getFileName(fileInfo, formData) {
+            return fileInfo.name;
         },
         finished(fileInfo, formData) {
             if (formData.model) {

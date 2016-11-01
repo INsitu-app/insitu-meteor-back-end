@@ -105,14 +105,16 @@ Template.models.helpers({
     },
     onPreviewUpload() {
         return {
-            finished(index, file, template) {
+            finished(index, fileInfo, template) {
                 let $input = $(template.find("input[type=file]"));
+
+                fileInfo.url = `/upload/${fileInfo.subDirectory}/${fileInfo.name}`;
 
                 Models.update({
                     _id: $input.attr("data-form-id")
                 }, {
                     $set: {
-                        image: file
+                        image: fileInfo
                     }
                 });
             }
