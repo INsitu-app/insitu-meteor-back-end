@@ -14,7 +14,7 @@ import "../imports/ui/body/body.js";
  * Meteor
  */
 Meteor.startup(() => {
-    UI.registerHelper("currentRouteName",function(){
+    UI.registerHelper("currentRouteName", () => {
         return Router.current() && Router.current().route ? Router.current().route.getName() : false;
     });
 });
