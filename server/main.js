@@ -8,6 +8,12 @@ import "../imports/startup/router/api.js";
 
 import "./upload.js";
 
+Meteor.methods({
+    'serverIp': function () {
+        return this.connection.httpHeaders.host;
+    }
+});
+
 Meteor.startup(() => {
     WebApp.rawConnectHandlers.use(function (req, res, next) {
         res.setHeader("Access-Control-Allow-Origin", "*");

@@ -7,6 +7,7 @@ import "./editor/editor.js";
 import { Meteor } from "meteor/meteor";
 import { Template } from "meteor/templating";
 import { ReactiveDict } from "meteor/reactive-dict";
+import { ReactiveVar } from "meteor/reactive-var"
 import { Router } from "meteor/iron:router";
 
 import { Models } from "../../api/models.js";
@@ -14,24 +15,9 @@ import { Collections } from "../../api/collections.js";
 
 import { copyToClipboard } from "../../helpers/clipboard.js";
 
-function UI() {
-    $("[data-event='draggable-model']").draggable({
-        revert: true,
-        appendTo: "body",
-        zIndex: 100000,
-        start(event, ui) {
-            $(ui.helper).css({
-                "opacity": 0.5
-            });
-        },
-        stop(event, ui) {
-            $(ui.helper).css({
-                "opacity": ""
-            });
-        }
-    });
-
-    $("[data-event='droppable-model-area'] li").droppable({
+function droppable() {
+    $("[data-event='droppable-model'] li").droppable({
+        tolerance: 'pointer',
         over(event, ui) {
             $(event.target).css({
                 "background-color": "#ccc"
@@ -47,8 +33,8 @@ function UI() {
                 "background-color": ""
             });
 
-            let id = $(ui.helper).find("[data-id]").attr("data-id");
-            let collection = $target.attr("data-collection");
+            let id = $(ui.helper).data('bind-id');
+            let collection = $target.data("bind-collection");
 
             Models.update({
                 _id: id
@@ -61,8 +47,53 @@ function UI() {
     });
 }
 
-Template.models.onRendered(() => {
-    $(window).off().on("scroll", function (event) {
+function draggable() {
+    $("[data-event='draggable-model']").draggable({
+        revert: true,
+        appendTo: "body",
+        zIndex: 100000,
+        start(event, ui) {
+            $(ui.helper).css({
+                "opacity": 0.5
+            });
+        },
+        stop(event, ui) {
+            $(ui.helper).css({
+                "opacity": ""
+            });
+        }
+    });
+}
+
+/**
+ * Collection item
+ */
+Template.collectionItem.onRendered(function () {
+    droppable();
+});
+
+Template.collectionItem.helpers({
+    isActiveCollection(collection) {
+        return Router.current().params.collection === collection;
+    }
+});
+
+/**
+ * Model item
+ */
+Template.modelItem.onRendered(function () {
+    draggable();
+});
+
+/**
+ * Base template
+ */
+Template.models.onCreated(function () {
+    this.modelList = new ReactiveVar();
+});
+
+Template.models.onRendered(function () {
+    $(window).off().on("scroll", () => {
         if (window.scrollY >= 49) {
             $(".sidebar").css({
                 top: 0
@@ -73,8 +104,6 @@ Template.models.onRendered(() => {
             });
         }
     });
-
-    UI();
 });
 
 Template.models.helpers({
@@ -82,23 +111,19 @@ Template.models.helpers({
         return Router.current().params.collection === collection;
     },
     modelList() {
-        UI();
-
         let query = {
             owner: Meteor.userId()
         };
 
-        let collection = Router.current().params.collection;
-
-        if (collection) {
-            query.collection = collection;
+        if (Router.current().params.collection) {
+            query.collection = Router.current().params.collection;
         }
 
-        return Models.find(query);
+        Template.instance().modelList.set(Models.find(query));
+
+        return Template.instance().modelList.get()
     },
     collectionList() {
-        UI();
-
         return Collections.find({
             owner: Meteor.userId()
         });
@@ -108,10 +133,10 @@ Template.models.helpers({
             finished(index, fileInfo, template) {
                 let $input = $(template.find("input[type=file]"));
 
-                fileInfo.url = `/upload/${fileInfo.subDirectory}/${fileInfo.name}`;
+                //fileInfo.url = `/upload/${fileInfo.subDirectory}/${fileInfo.name}`;
 
                 Models.update({
-                    _id: $input.attr("data-form-id")
+                    _id: $input.data("bind-id")
                 }, {
                     $set: {
                         image: fileInfo
@@ -119,53 +144,154 @@ Template.models.helpers({
                 });
             }
         }
+    },
+    onDumpUpload() {
+        return {
+            finished(index, fileInfo, template) {
+                fileInfo.url = `/upload/${fileInfo.subDirectory}/${fileInfo.name}`;
+
+                console.log(index, fileInfo);
+            }
+        }
     }
 });
 
 Template.models.events({
-    "click [data-event='collection-save']"(event) {
-        let $name = $("[data-event='collection-name']");
+    "click [data-event='collection-add']"() {
+        let $currentModal = $('#collection-add');
+
+        $currentModal.find('[data-bind="collection-name"]').val('');
+        $currentModal.modal('show');
+
+        return false;
+    },
+    "dblclick [data-event='collection-rename']"() {
+        let $currentModal = $('#collection-rename');
+
+        $currentModal.find('[data-bind="collection-id"]').val(this._id);
+        $currentModal.find('[data-bind="collection-name"]').val(this.name);
+        $currentModal.modal('show');
+
+        return false;
+    },
+    "click [data-event='collection-close']"() {
+        let $currentModal = null;
+        let $addModal = $('#collection-add');
+        let $renameModal = $('#collection-rename');
+
+        if ($addModal.hasClass('in')) {
+            $currentModal = $addModal;
+            $currentModal.mode = 'add';
+        } else if ($renameModal.hasClass('in')) {
+            $currentModal = $renameModal;
+            $currentModal.mode = 'rename';
+        }
+
+        let $id = $currentModal.find("[data-bind='collection-id']");
+        let $name = $currentModal.find("[data-bind='collection-name']");
+
+        $name.parent().removeClass("has-error");
+        $name.parent().removeClass("has-warning");
+
+        $($currentModal).modal('hide');
+
+        $id.val('');
+        $name.val('');
+    },
+    "click [data-event='collection-save']"() {
+        let $currentModal = null;
+        let $addModal = $('#collection-add');
+        let $renameModal = $('#collection-rename');
+
+        if ($addModal.hasClass('in')) {
+            $currentModal = $addModal;
+            $currentModal.mode = 'add';
+        } else if ($renameModal.hasClass('in')) {
+            $currentModal = $renameModal;
+            $currentModal.mode = 'rename';
+        }
+
+        let $id = $currentModal.find("[data-bind='collection-id']");
+        let $name = $currentModal.find("[data-bind='collection-name']");
+
+        $name.parent().removeClass("has-error");
+        $name.parent().removeClass("has-warning");
 
         if (!$name.val().length) {
             $name.parent().addClass("has-error");
             return false;
         }
 
-        let collection = Collections.findOne({name: $name.val()});
+        if (["all", "without"].indexOf($name.val().toLowerCase()) !== -1) {
+            $name.parent().addClass("has-error");
+            return false;
+        }
+
+        let collection = Collections.findOne({
+            name: $name.val(),
+            owner: Meteor.userId()
+        });
 
         if (collection) {
             $name.parent().addClass("has-warning");
             return false;
         }
 
-        Collections.insert({
-            name: $name.val(),
-            owner: Meteor.userId()
-        });
+        if ($currentModal.mode == 'add') {
+            Collections.insert({
+                name: $name.val(),
+                owner: Meteor.userId()
+            });
+        } else if ($currentModal.mode == 'rename') {
+            Collections.update({
+                _id: $id.val()
+            }, {
+                $set: {
+                    name: $name.val()
+                }
+            });
+        }
 
-        $("[data-dismiss='modal']").click();
+        $($currentModal).modal('hide');
 
+        $id.val('');
         $name.val('');
-    },
-    "click [data-event='collection-remove']"(event) {
-        let id = $(event.currentTarget).closest("li").attr("data-collection");
 
+        let query = {
+            owner: Meteor.userId()
+        };
+
+        if (Router.current().params.collection) {
+            query.collection = Router.current().params.collection;
+        }
+
+        Template.instance().modelList.set(Models.find(query));
+    },
+    "click [data-event='collection-remove']"() {
         Collections.remove({
-            _id: id
+            _id: this._id
         });
 
-        if (Router.current().params.collection == id) {
+        let query = {
+            owner: Meteor.userId()
+        };
+
+        if (Router.current().params.collection) {
+            query.collection = Router.current().params.collection;
+        }
+
+        Template.instance().modelList.set(Models.find(query));
+
+        if (Router.current().params.collection == this._id) {
             Router.go("models");
         }
     },
-    "click [data-event='model-remove']"(event) {
-        let id = $(event.currentTarget).attr("data-id");
-
+    "click [data-event='model-remove']"() {
         if (confirm("Remove this model?")) {
-            Models.remove({_id: id});
+            Models.remove({_id: this._id});
         }
     },
-    "click [data-event='copy-iframe']"(event) {
+    "click [data-event='copy-iframe']"() {
         let $alert = $(".alert-copy");
 
         let width = 560;
@@ -216,21 +342,80 @@ Template.models.events({
     },
     "click [data-event='alert-close']"(event) {
         $(event.currentTarget).closest(".alert").fadeOut();
+    },
+
+    "submit [data-event='upload']"(event) {
+        let form = $(event.target).get(0);
+        let data = new FormData(form);
+
+        $.ajax({
+            type: "POST",
+            url: "/api/upload",
+            data: data,
+            cache: false,
+            dataType: 'json',
+            processData: false,
+            contentType: false
+        }).done((response) => {
+            console.log(response);
+        });
+
+        //let models = Models.find().fetch();
+        //
+        //models.forEach((model) => {
+        //    model.uploads.forEach((upload) => {
+        //        upload.url = upload.url.replace(/http:\/\/(.+):3000\//g, 'asdasd')
+        //    });
+        //
+        //    Models.update({ _id: model._id }, {
+        //        $set: {
+        //            uploads: model.uploads
+        //        }
+        //    });
+        //});
+
+        return false;
     }
 });
 
-Template.uploadPreview.created = () => {
+/**
+ * Upload dump
+ */
+Template.uploadDump.onCreated(function () {
     Uploader.init(Template.instance());
-};
+});
 
-Template.uploadPreview.rendered = () => {
+Template.uploadDump.onRendered(function () {
     Uploader.render.call(Template.instance());
-};
+});
+
+Template.uploadDump.events({
+    "fileuploadadd"(event, template, data) {
+        data.formData = {
+            method: "restore"
+        };
+
+        data.process().done(() => {
+            data.submit();
+        });
+    }
+});
+
+/**
+ * Upload preview
+ */
+Template.uploadPreview.onCreated(function () {
+    Uploader.init(Template.instance());
+});
+
+Template.uploadPreview.onRendered(function () {
+    Uploader.render.call(Template.instance());
+});
 
 Template.uploadPreview.events({
     "fileuploadadd"(event, template, data) {
         let model = Models.findOne({
-            _id: $(event.target).attr("data-form-id")
+            _id: $(event.target).data("bind-id")
         });
 
         if (model) {

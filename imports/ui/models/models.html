@@ -7,7 +7,16 @@
                 <div class="container">
                     <div class="col-sm-9 col-md-10 col-sm-offset-3 col-md-offset-3">
                         <h2>Your Models!</h2>
-                        <a class="btn btn-lg btn-default" href="{{pathFor 'uploads' collection=routerParams.collection}}">Upload &raquo;</a>
+                        <!--{{> uploadDump callbacks=onDumpUpload}}-->
+                        <!--<a class="btn btn-lg btn-default" href="javascript:void(0)" data-event="normalize">Normalize &raquo;</a>-->
+                        <!--<form method="post" enctype="multipart/form-data" data-event="upload">-->
+                            <!--<input type="text" name="first" value="Bob"/>-->
+                            <!--<input type="text" name="middle" value="James"/>-->
+                            <!--<input type="text" name="last" value="Smith"/>-->
+                            <!--<input type="file" name="images[]" accept="image/*,application/zip" multiple/>-->
+                            <!--<button type="submit">Submit</button>-->
+                        <!--</form>-->
+                        <a class="btn btn-lg btn-default" href="{{pathFor 'uploads' collection=params.collection}}">Upload &raquo;</a>
                     </div>
                 </div>
             </div>
@@ -19,80 +28,35 @@
             <div class="col-sm-3 sidebar col-md-3">
                 <div class="page-header">
                     <h4 class="pull-left">COLLECTIONS</h4>
-                    <button class="btn icon-btn btn-glyphicon btn-success-bg pull-right" data-toggle="modal" data-target=".collection-add">
+                    <button class="btn icon-btn btn-glyphicon btn-success-bg pull-right" data-event="collection-add">
                         <span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success bg-colour-button"></span>
                     </button>
                     <div class="clearfix"></div>
                 </div>
-                <ul class="nav nav-sidebar" data-event="droppable-model-area">
-                    <li class="{{#if isActiveCollection }}active{{/if}}" data-collection="all">
-                        <a href="{{ pathFor 'models'}}">all</a>
+                <ul class="nav nav-sidebar" data-event="droppable-model">
+                    <li class="{{#if isActiveCollection }}active{{/if}}" data-bind-collection="without">
+                        <a href="{{ pathFor 'models'}}">All</a>
                     </li>
+
                     {{#each collectionList}}
-                        <li class="{{#if isActiveCollection _id}}active{{/if}}" data-collection="{{_id}}" style="position: relative;">
-                            <a href="{{ pathFor 'models' collection=_id }}">{{name}}</a>
-                            <button class="close" style="position: absolute; top: 7px; right: 15px;" data-event="collection-remove">
-                                <span>&times;</span>
-                            </button>
-                        </li>
+                        {{> collectionItem}}
                     {{/each}}
                 </ul>
             </div>
             <div class="col-sm-offset-3 main col-md-offset-3">
                 {{#each modelList}}
-                    <div class="col-sm-6 col-md-3">
-                        <div data-event="draggable-model">
-                            <div style="position: absolute; top: 10px; right: 10px;">
-                                {{> uploadPreview id=_id callbacks=onPreviewUpload}}
-
-                                <button class="btn btn-danger" data-event="model-remove" data-id="{{_id}}">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </div>
-
-                            <a class="thumbnail" href="{{pathFor 'editor' id=_id}}" title="{{name}}">
-                                {{#if image}}
-                                    <div style="height: 200px; background: url('{{image.url}}') 50% 50%; background-size: cover;"></div>
-                                {{else}}
-                                    <div style="height: 200px; background: url('/images/clara_bg copy.jpg') 50% 50%; background-size: cover;"></div>
-                                {{/if}}
-
-                                <div class="caption">
-                                    <h3>{{name}}</h3>
-                                    <div>
-                                        <div class="pull-left" style="width: 60%; height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                            {{#if collection}}
-                                                <span class="text-success">{{collection.name}}</span>
-                                            {{else}}
-                                                <span class="text-danger">Without collection</span>
-                                            {{/if}}
-                                        </div>
-                                        <div class="pull-right">
-                                            <button data-event="copy-iframe" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
-                                                <span class="glyphicon glyphicon-menu-left"></span>
-                                                <span class="glyphicon glyphicon-menu-right" style="position: relative; right: 6px;"></span>
-                                            </button>
-                                            <button data-event="copy-link" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
-                                                <span class="glyphicon glyphicon-link"></span>
-                                            </button>
-                                        </div>
-                                        <div class="clearfix"></div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
+                    {{> modelItem}}
                 {{/each}}
             </div>
         </div>
     </div>
 
     <div class="modals">
-        <div class="modal fade collection-add" tabindex="-1">
+        <div id="collection-add" class="modal fade" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button class="close" data-dismiss="modal">
+                        <button class="close" data-event="collection-close">
                             <span>&times;</span>
                         </button>
                         <h4 class="modal-title">New collection</h4>
@@ -100,29 +64,116 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label class="control-label">Name</label>
-                            <input type="text" class="form-control" placeholder="Your collection name" data-event="collection-name">
+                            <input type="text" class="form-control" placeholder="Your collection name" data-bind="collection-name">
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-primary" data-event="collection-save">Save</button>
-                        <button class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-default" data-event="collection-close">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="collection-rename" class="modal fade" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close" data-event="collection-close">
+                            <span>&times;</span>
+                        </button>
+                        <h4 class="modal-title">Rename collection</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="control-label">Name</label>
+                            <input type="text" class="form-control" placeholder="Your collection name" data-bind="collection-name">
+                            <input type="hidden" data-bind="collection-id">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-event="collection-save">Save</button>
+                        <button class="btn btn-default" data-event="collection-close">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="alert alert-copy" style="position: fixed; bottom: 0; right: 20px; display: none;">
-            <button type="button" class="close" data-event="alert-close"><span aria-hidden="true">&times;</span></button>
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" style="position: relative; top: 4px; padding-right: 5px;"></span>
+            <button type="button" class="close" data-event="alert-close">&times;</button>
+            <span class="glyphicon glyphicon-exclamation-sign" style="position: relative; top: 4px; padding-right: 5px;"></span>
             <span class="message" style="position: relative; top: 2px; padding-right: 15px;">Undefined error</span>
         </div>
     </div>
 </template>
 
+<template name="collectionItem">
+    <li class="{{#if isActiveCollection _id}}active{{/if}}" data-event="collection-rename" data-bind-collection="{{_id}}" style="position: relative;">
+        <a href="{{ pathFor 'models' collection=_id }}">{{name}}</a>
+
+        <button class="close" style="position: absolute; top: 7px; right: 15px;" data-event="collection-remove">
+            <span>&times;</span>
+        </button>
+    </li>
+</template>
+
+<template name="modelItem">
+    <div class="col-sm-6 col-md-3">
+        <div data-event="draggable-model" data-bind-id="{{_id}}">
+            <div style="position: absolute; top: 10px; right: 10px;">
+                {{> uploadPreview id=_id callbacks=onPreviewUpload}}
+
+                <button class="btn btn-danger" data-event="model-remove">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+            </div>
+
+            <a class="thumbnail" href="{{pathFor 'editor' id=_id}}" title="{{name}}">
+                {{#if image}}
+                    <div style="height: 200px; background: url('{{image.url}}') 50% 50%; background-size: cover;"></div>
+                {{else}}
+                    <div style="height: 200px; background: url('/images/clara_bg copy.jpg') 50% 50%; background-size: cover;"></div>
+                {{/if}}
+
+                <div class="caption">
+                    <h3>{{name}}</h3>
+                    <div>
+                        <div class="pull-left" style="width: 60%; height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            {{#if collection}}
+                                <span class="text-success">{{collection.name}}</span>
+                            {{else}}
+                                <span class="text-danger">Without</span>
+                            {{/if}}
+                        </div>
+                        <div class="pull-right">
+                            <button data-event="copy-iframe" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
+                                <span class="glyphicon glyphicon-menu-left"></span>
+                                <span class="glyphicon glyphicon-menu-right" style="position: relative; right: 6px;"></span>
+                            </button>
+                            <button data-event="copy-link" style="background: none; border: 0; margin: 0; padding: 0; outline: none; cursor: pointer;">
+                                <span class="glyphicon glyphicon-link"></span>
+                            </button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</template>
+
+<template name="uploadDump">
+    <form method="POST" enctype="multipart/form-data" style="display: inline-block;">
+        <div class="btn btn-lg btn-default btn-file">
+            <input type="file" class="jqUploadclass" accept=".zip" data-form-data="{}"> Restore from dump &raquo;
+        </div>
+    </form>
+</template>
+
 <template name="uploadPreview">
     <form method="POST" enctype="multipart/form-data" style="display: inline-block;">
         <div class="btn btn-default btn-file">
-            <input type="file" class="jqUploadclass" data-form-id="{{id}}" data-form-data="{}" accept=".jpeg,.png,.bmp"> Thumb
+            <input type="file" class="jqUploadclass" accept=".jpeg,.png,.bmp" data-form-data="{}" data-bind-id="{{id}}"> Thumb
         </div>
     </form>
 </template>

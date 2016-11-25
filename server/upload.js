@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import decompress from "decompress";
 
 Meteor.startup(() => {
     let root = process.env.PWD || Meteor.absolutePath;
@@ -13,6 +14,8 @@ Meteor.startup(() => {
             switch (formData.method) {
                 case "preview":
                     return `${formData.folder}/previews/`;
+                case "restore":
+                    return "restore/";
                 default:
                     let folder = "misc";
 
@@ -62,6 +65,16 @@ Meteor.startup(() => {
                         });
                     });
                 }
+            } else if (formData.method == "restore") {
+                decompress(`${root}/uploads/${fileInfo.path}`, `${root}/uploads/${fileInfo.subDirectory}`, {
+                    filter(file) {
+                        return file.path.indexOf("__MACOSX") === -1
+                    }
+                }).then(function (files) {
+                    fs.unlinkSync(`${root}/uploads/${fileInfo.path}`);
+
+                    console.log(files);
+                });
             }
         }
     });

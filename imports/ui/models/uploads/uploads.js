@@ -85,6 +85,7 @@ Template.uploads.events({
         doneCount++;
 
         if (data.result && data.result.files[0]) {
+            //data.result.files[0].url = `/upload/${data.result.files[0].subDirectory}/${data.result.files[0].name}`;
             uploadsData.push(data.result.files[0]);
         }
 

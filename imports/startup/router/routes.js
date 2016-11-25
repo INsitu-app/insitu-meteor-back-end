@@ -7,7 +7,7 @@ Router.configure({
 BaseController = RouteController.extend({
     data: function () {
         return {
-            routerParams: this.params
+            params: this.params
         };
     }
 });
