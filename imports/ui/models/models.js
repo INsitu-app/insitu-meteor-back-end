@@ -297,7 +297,7 @@ Template.models.events({
         let width = 560;
         let height = 315;
 
-        let page = `?page=viewer&query=${this._id}`;
+        let page = `?only&page=viewer&model=${this._id}`;
         let link = `http://138.68.144.164:3005/${page}`;
 
         let iframe = `<iframe width="${width}" height="${height}" src="${link}" frameborder="0" allowfullscreen></iframe>`;
@@ -321,7 +321,7 @@ Template.models.events({
     "click [data-event='copy-link']"() {
         let $alert = $(".alert-copy");
 
-        let page = `?page=viewer&query=${this._id}`;
+        let page = `?page=viewer&model=${this._id}`;
         let link = `http://138.68.144.164:3005/${page}`;
 
         copyToClipboard(link, (err, status) => {
