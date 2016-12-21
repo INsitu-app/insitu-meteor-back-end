@@ -298,8 +298,8 @@ Template.models.events({
         let height = 315;
 
         let page = `?only&page=viewer&model=${this._id}`;
-        // let link = `http://138.68.144.164:3005/${page}`;
-        let link = `http://138.68.128.66:3005/${page}`;
+        let link = `http://138.68.144.164:3005/${page}`;
+        // let link = `http://138.68.128.66:3005/${page}`;
 
         let iframe = `<iframe width="${width}" height="${height}" src="${link}" frameborder="0" allowfullscreen></iframe>`;
 
@@ -323,8 +323,8 @@ Template.models.events({
         let $alert = $(".alert-copy");
 
         let page = `?page=viewer&model=${this._id}`;
-        // let link = `http://138.68.144.164:3005/${page}`;
-        let link = `http://138.68.128.66:3005/${page}`;
+        let link = `http://138.68.144.164:3005/${page}`;
+        // let link = `http://138.68.128.66:3005/${page}`;
 
         copyToClipboard(link, (err, status) => {
             $alert
